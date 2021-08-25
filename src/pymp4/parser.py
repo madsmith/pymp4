@@ -328,7 +328,8 @@ DataReferenceBox = Struct(
     "type" / Const(b"dref"),
     "version" / Const(Int8ub, 0),
     "flags" / Default(Int24ub, 0),
-    "data_entries" / PrefixedArray(Int32ub, Select(DataEntryUrnBox, DataEntryUrlBox)),
+    "data_entries" / PrefixedArray(Int32ub, Select(
+        DataEntryUrnBox, DataEntryUrlBox, LazyBound(lambda _: Box))),
 )
 
 # Sample Table boxes (stbl)

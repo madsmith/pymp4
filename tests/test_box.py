@@ -169,3 +169,18 @@ class BoxTests(unittest.TestCase):
             (name="VideoHandler")
             (end=45)
         )
+
+
+    def test_dref_parse(self):
+        dref_alis = b'\x00\x00\x00\x1Cdref\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x0Calis\x00\x00\x00\x01'
+
+        self.assertEqual(
+            Box.parse(dref_alis),
+            Container(offset=0)
+            (type=b'dref')
+            (version=0)
+            (flags=0)
+            (data_entries=[Container(offset=16)(type=b'alis')(data=b'\x00\x00\x00\x01')(end=28)])
+            (end=28)
+        )
+
