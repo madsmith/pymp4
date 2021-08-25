@@ -80,6 +80,27 @@ class PrefixedIncludingSize(Subconstruct):
         return self.lengthfield._sizeof(context, path) + self.subcon._sizeof(context, path)
 
 
+class GreedyNulTerminatedString(Construct):
+    def __init__(self, encoding):
+        super(GreedyNulTerminatedString, self).__init__()
+        self.encoding = encoding
+
+    def _readUntilNul(self, stream):
+        while True:
+            c = stream.read(1)
+            yield c
+            if c == '\0' or c == b'':
+                return
+
+    def _parse(self, stream, context, path):
+        #data = stream.read()
+        data = self._readUntilNul(stream)
+        data = b''.join(data)
+        return data.decode(self.encoding).rstrip("\0")
+
+    def _build(self, obj, stream, context, path):
+        return stream.write(obj)
+
 # Header box
 
 FileTypeBox = Struct(
@@ -267,7 +288,7 @@ HandlerReferenceBox = Struct(
     Padding(4, pattern=b"\x00"),
     "handler_type" / String(4),
     Padding(12, pattern=b"\x00"),  # Int32ub[3]
-    "name" / CString(encoding="utf8")
+    "name" / GreedyNulTerminatedString(encoding="utf8")
 )
 
 # Boxes contained by Media Info Box

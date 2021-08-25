@@ -130,3 +130,42 @@ class BoxTests(unittest.TestCase):
             (entries=[Container(format=b'tx3g')(data_reference_index=1)(data=tx3g_data)])
             (end=len(in_bytes))
         )
+
+    def test_hdlr_parse(self):
+        generic_sound_media_handler = b'\x00\x00\x00\x30\x68\x64\x6C\x72\x00\x00\x00\x00\x00\x00\x00\x00\x73\x6F\x75\x6E\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x47\x65\x6E\x65\x72\x69\x63\x20\x48\x61\x6E\x64\x6C\x65\x72\x00'
+        # Some files have been found to use PascalStrings and not be null terminated, causing the parse to crash
+        apple_sound_media_handler = b'\x00\x00\x00\x3A\x68\x64\x6C\x72\x00\x00\x00\x00\x00\x00\x00\x00\x73\x6F\x75\x6E\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x19\x41\x70\x70\x6C\x65\x20\x53\x6F\x75\x6E\x64\x20\x4D\x65\x64\x69\x61\x20\x48\x61\x6E\x64\x6C\x65\x72'
+        video_handler = b'\x00\x00\x00\x2D\x68\x64\x6C\x72\x00\x00\x00\x00\x00\x00\x00\x00\x76\x69\x64\x65\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x56\x69\x64\x65\x6F\x48\x61\x6E\x64\x6C\x65\x72\x00'
+
+        self.assertEqual(
+            Box.parse(generic_sound_media_handler),
+            Container(offset=0)
+            (type=b'hdlr')
+            (version=0)
+            (flags=0)
+            (handler_type=b"soun")
+            (name="Generic Handler")
+            (end=48)
+        )
+
+        self.assertEqual(
+            Box.parse(apple_sound_media_handler),
+            Container(offset=0)
+            (type=b'hdlr')
+            (version=0)
+            (flags=0)
+            (handler_type=b"soun")
+            (name="\x19Apple Sound Media Handler")
+            (end=58)
+        )
+
+        self.assertEqual(
+            Box.parse(video_handler),
+            Container(offset=0)
+            (type=b"hdlr")
+            (version=0)
+            (flags=0)
+            (handler_type=b"vide")
+            (name="VideoHandler")
+            (end=45)
+        )
